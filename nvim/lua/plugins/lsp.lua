@@ -17,11 +17,11 @@ return {
                 automatic_installation = true,
             })
 
-            vim.lsp.enable({ "lua_ls", "pyright", "html", "cssls" })
-
-            require("lspconfig").emmet_ls.setup({
+            vim.lsp.config("emmet_ls", {
                 filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
             })
+
+            vim.lsp.enable({ "lua_ls", "pyright", "html", "cssls", "emmet_ls" })
 
             vim.api.nvim_create_autocmd("LspAttach", {
                 callback = function(event)
