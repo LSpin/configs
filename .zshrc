@@ -58,6 +58,9 @@ alias find='fd'
 alias ghcs='gh copilot suggest'
 alias ghce='gh copilot explain'
 
+# brew
+alias buu='brew update && brew upgrade'
+
 # =============================================================================
 # FUNCTIONS
 # =============================================================================
