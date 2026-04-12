@@ -80,10 +80,5 @@ source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
 TMOUT=60
 TRAPALRM() { cmatrix -s -C magenta; }
 
-# =============================================================================
-# STARTUP
-# =============================================================================
-fastfetch
-
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh

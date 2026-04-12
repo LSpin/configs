@@ -34,7 +34,7 @@ brew install \
   neovim neovim-remote \
   fzf eza bat fd ripgrep \
   zoxide git-delta lazygit \
-  btop fastfetch cmatrix \
+  btop cmatrix \
   thefuck tldr \
   node python@3.13 \
   asdf wget
