@@ -21,8 +21,13 @@ function M.toggle()
         vim.cmd("Lazy load twilight.nvim")
 
         vim.cmd("PencilSoft")
-        require("zen-mode").open()
-        require("twilight").enable()
+        -- Disable zen-mode's built-in twilight integration (enabled by default),
+        -- then enable twilight ourselves after zen-mode finishes all window
+        -- switching (fix_hl fires WinEnter which crashes twilight if active)
+        require("zen-mode").open({ plugins = { twilight = { enabled = false } } })
+        vim.schedule(function()
+            require("twilight").enable()
+        end)
 
         vim.notify("Writing mode ON", vim.log.levels.INFO)
     else
@@ -35,8 +40,10 @@ function M.toggle()
         vim.opt.relativenumber = false
 
         vim.cmd("PencilOff")
-        require("zen-mode").close()
+        -- Disable twilight first to remove its WinEnter autocmd before
+        -- zen-mode closes its window (nvim_win_close fires WinEnter)
         require("twilight").disable()
+        require("zen-mode").close()
 
         vim.notify("Writing mode OFF", vim.log.levels.INFO)
     end

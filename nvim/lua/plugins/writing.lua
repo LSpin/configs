@@ -27,6 +27,18 @@ return {
             dimming = { alpha = 0.25 },
             context = 10,
         },
+        config = function(_, opts)
+            require("twilight").setup(opts)
+            -- Patch get_node to guard against buffers with no treesitter parser
+            -- (upstream calls parser:for_each_tree without a nil check)
+            local view = require("twilight.view")
+            local orig = view.get_node
+            view.get_node = function(buf, line)
+                local ok, parser = pcall(vim.treesitter.get_parser, buf, nil, { error = false })
+                if not ok or not parser then return end
+                return orig(buf, line)
+            end
+        end,
     },
 
     -- Prose-friendly word wrap
