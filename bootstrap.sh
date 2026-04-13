@@ -97,6 +97,50 @@ mkdir -p "$HOME/.config"
 cp -r "$CONFIGS_DIR/nvim" "$HOME/.config/nvim"
 
 # -----------------------------------------------------------------------------
+# Font: Atkinson Hyperlegible
+# -----------------------------------------------------------------------------
+info "Configuring Atkinson Hyperlegible as default font..."
+
+# VS Code — editor + integrated terminal
+python3 - <<'PYEOF'
+import json, os
+
+path = os.path.expanduser("~/Library/Application Support/Code/User/settings.json")
+os.makedirs(os.path.dirname(path), exist_ok=True)
+settings = {}
+if os.path.exists(path):
+    try:
+        with open(path) as f:
+            settings = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        pass
+settings["editor.fontFamily"] = "Atkinson Hyperlegible"
+settings["terminal.integrated.fontFamily"] = "Atkinson Hyperlegible"
+with open(path, "w") as f:
+    json.dump(settings, f, indent=2)
+PYEOF
+
+# iTerm2 — set font on every profile in the plist
+python3 - <<'PYEOF'
+import plistlib, os, subprocess
+
+plist = os.path.expanduser("~/Library/Preferences/com.googlecode.iterm2.plist")
+font  = "AtkinsonHyperlegible-Regular 13"
+
+if os.path.exists(plist):
+    subprocess.run(["plutil", "-convert", "xml1", plist], check=True)
+    with open(plist, "rb") as f:
+        prefs = plistlib.load(f)
+    for profile in prefs.get("New Bookmarks", []):
+        profile["Normal Font"]    = font
+        profile["Non Ascii Font"] = font
+    with open(plist, "wb") as f:
+        plistlib.dump(prefs, f, fmt=plistlib.FMT_XML)
+PYEOF
+
+success "Font configured (VS Code, iTerm2)"
+
+# -----------------------------------------------------------------------------
 # Git delta
 # -----------------------------------------------------------------------------
 info "Configuring git delta..."
