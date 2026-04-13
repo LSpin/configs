@@ -3,6 +3,15 @@ vim.g.mapleader = " "
 
 require("options")
 
+-- Motion rebinds
+vim.keymap.set({'n', 'v', 'o'}, 'b', '^', { noremap = true })
+vim.keymap.set({'n', 'v', 'o'}, 'B', '$', { noremap = true })
+
+-- Disable arrow keys
+for _, key in ipairs({'<Up>', '<Down>', '<Left>', '<Right>'}) do
+    vim.keymap.set({'n', 'v', 'i', 'o'}, key, '<Nop>', { noremap = true })
+end
+
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not (vim.uv or vim.loop).fs_stat(lazypath) then
