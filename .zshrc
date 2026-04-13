@@ -80,7 +80,7 @@ source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
 # =============================================================================
 # SCREENSAVER
 # =============================================================================
-TMOUT=60
+TMOUT=120
 TRAPALRM() { cmatrix -s -C magenta; }
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
