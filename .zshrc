@@ -24,7 +24,7 @@ fi
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 COMPLETION_WAITING_DOTS="true"
-plugins=(git macos)
+plugins=(git macos zsh-syntax-highlighting fzf docker)
 source $ZSH/oh-my-zsh.sh
 
 # =============================================================================
