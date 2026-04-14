@@ -2,12 +2,15 @@
 # SPLASH SCREEN
 # =============================================================================
 cat << 'SPLASH'
-   /\_____/\
-  /  ^   ^  \
- ( ==  v  == )    meow. Feed me.
-  )         (     meow. coffee is on your side.
- (  |     |  )    meow. the bug fears you.
-  \_|_____|_/
+  *       .    *     .       *
+    .   /\_____/\       *
+       /  ^   ^  \   .
+  *   ( ==  v  == )      meow. from orbit.
+    .  )         (       meow. no gravity, no bugs.
+  *   (  |     |  )  .   meow. the void fears me.
+       \_|_____|_/
+    .   ~~(O)~~    *   .
+  *           .       *
 
 SPLASH
 
