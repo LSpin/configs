@@ -53,7 +53,8 @@ brew install --cask \
   google-chrome \
   discord \
   spotify \
-  font-cousine-nerd-font
+  font-courier-prime-code \
+  fontforge
 
 # -----------------------------------------------------------------------------
 # Oh My Zsh
@@ -97,9 +98,20 @@ mkdir -p "$HOME/.config"
 cp -r "$CONFIGS_DIR/nvim" "$HOME/.config/nvim"
 
 # -----------------------------------------------------------------------------
-# Font: Cousine Nerd Font
+# Font: Courier Prime Code (Nerd Font patched)
 # -----------------------------------------------------------------------------
-info "Configuring Cousine Nerd Font as default font..."
+info "Patching and installing Courier Prime Code Nerd Font..."
+
+curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FontPatcher.zip -o /tmp/FontPatcher.zip
+unzip -o /tmp/FontPatcher.zip -d /tmp/FontPatcher
+
+mkdir -p /tmp/patched-fonts
+fontforge -script /tmp/FontPatcher/font-patcher \
+  "$HOME/Library/Fonts/Courier Prime Code.ttf" \
+  --complete \
+  --outputdir /tmp/patched-fonts/
+
+cp /tmp/patched-fonts/CourierPrimeCodeNerdFont-Regular.ttf "$HOME/Library/Fonts/"
 
 # VS Code — editor + integrated terminal
 python3 - <<'PYEOF'
@@ -114,8 +126,8 @@ if os.path.exists(path):
             settings = json.load(f)
     except (json.JSONDecodeError, OSError):
         pass
-settings["editor.fontFamily"] = "CousineNerdFont-Regular"
-settings["terminal.integrated.fontFamily"] = "CousineNerdFont-Regular"
+settings["editor.fontFamily"] = "CourierPrimeCodeNerdFont-Regular"
+settings["terminal.integrated.fontFamily"] = "CourierPrimeCodeNerdFont-Regular"
 with open(path, "w") as f:
     json.dump(settings, f, indent=2)
 PYEOF
@@ -125,7 +137,7 @@ python3 - <<'PYEOF'
 import plistlib, os, subprocess
 
 plist = os.path.expanduser("~/Library/Preferences/com.googlecode.iterm2.plist")
-font  = "CousineNerdFont-Regular 18"
+font  = "CourierPrimeCodeNerdFont-Regular 18"
 
 if os.path.exists(plist):
     subprocess.run(["plutil", "-convert", "xml1", plist], check=True)
