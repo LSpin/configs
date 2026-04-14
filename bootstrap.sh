@@ -48,6 +48,7 @@ info "Installing apps..."
 brew install --cask \
   iterm2 \
   visual-studio-code \
+  intellij-idea \
   alfred \
   alt-tab \
   google-chrome \
@@ -96,6 +97,17 @@ info "Linking configs..."
 cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
 mkdir -p "$HOME/.config"
 cp -r "$CONFIGS_DIR/nvim" "$HOME/.config/nvim"
+
+# IntelliJ — find whichever version dir exists (created on first launch)
+INTELLIJ_DIR=$(ls -d "$HOME/Library/Application Support/JetBrains/IntelliJIdea"* 2>/dev/null | sort -V | tail -1)
+if [[ -n "$INTELLIJ_DIR" ]]; then
+  mkdir -p "$INTELLIJ_DIR/options" "$INTELLIJ_DIR/keymaps"
+  cp "$CONFIGS_DIR/intellij/options/"*.xml "$INTELLIJ_DIR/options/"
+  cp "$CONFIGS_DIR/intellij/keymaps/"*.xml "$INTELLIJ_DIR/keymaps/"
+  success "IntelliJ config applied → $INTELLIJ_DIR"
+else
+  warn "IntelliJ config dir not found — launch IntelliJ once, then re-run bootstrap"
+fi
 
 # -----------------------------------------------------------------------------
 # Font: Courier Prime Code (Nerd Font patched)
