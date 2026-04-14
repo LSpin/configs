@@ -53,7 +53,7 @@ brew install --cask \
   google-chrome \
   discord \
   spotify \
-  font-cascadia-code-nf
+  font-cousine-nerd-font
 
 # -----------------------------------------------------------------------------
 # Oh My Zsh
@@ -97,9 +97,9 @@ mkdir -p "$HOME/.config"
 cp -r "$CONFIGS_DIR/nvim" "$HOME/.config/nvim"
 
 # -----------------------------------------------------------------------------
-# Font: Cascadia Code NF
+# Font: Cousine Nerd Font
 # -----------------------------------------------------------------------------
-info "Configuring Cascadia Code NF as default font..."
+info "Configuring Cousine Nerd Font as default font..."
 
 # VS Code — editor + integrated terminal
 python3 - <<'PYEOF'
@@ -114,8 +114,8 @@ if os.path.exists(path):
             settings = json.load(f)
     except (json.JSONDecodeError, OSError):
         pass
-settings["editor.fontFamily"] = "CascadiaCode NF"
-settings["terminal.integrated.fontFamily"] = "CascadiaCode NF"
+settings["editor.fontFamily"] = "CousineNerdFont-Regular"
+settings["terminal.integrated.fontFamily"] = "CousineNerdFont-Regular"
 with open(path, "w") as f:
     json.dump(settings, f, indent=2)
 PYEOF
@@ -125,7 +125,7 @@ python3 - <<'PYEOF'
 import plistlib, os, subprocess
 
 plist = os.path.expanduser("~/Library/Preferences/com.googlecode.iterm2.plist")
-font  = "CascadiaCodeNF-Regular 18"
+font  = "CousineNerdFont-Regular 18"
 
 if os.path.exists(plist):
     subprocess.run(["plutil", "-convert", "xml1", plist], check=True)
