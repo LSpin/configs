@@ -34,10 +34,12 @@ brew install \
   neovim neovim-remote \
   fzf eza bat fd ripgrep \
   zoxide git-delta lazygit \
-  btop cmatrix \
+  btop cmatrix fastfetch \
   thefuck tldr \
   node python@3.13 \
-  asdf wget
+  asdf wget awscli docker \
+  lua-language-server stylua \
+  openjdk@21 postgresql@16
 
 $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
 
@@ -49,12 +51,25 @@ brew install --cask \
   iterm2 \
   visual-studio-code \
   intellij-idea \
-  alfred \
+  raycast \
   alt-tab \
+  aldente \
   google-chrome \
+  google-drive \
   discord \
   spotify \
+  notion \
+  claude \
+  claude-code \
+  dbeaver-community \
+  adobe-acrobat-reader \
+  logi-options+ \
   font-courier-prime-code \
+  font-cascadia-code \
+  font-cascadia-code-nf \
+  font-cousine-nerd-font \
+  font-im-writing-nerd-font \
+  font-atkinson-hyperlegible \
   fontforge
 
 # -----------------------------------------------------------------------------
@@ -72,9 +87,16 @@ fi
 # Zsh plugins
 # -----------------------------------------------------------------------------
 info "Installing zsh plugins..."
-brew install zsh-autosuggestions zsh-syntax-highlighting
+brew install zsh-autosuggestions zsh-history-substring-search
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+
+if [[ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]]; then
+  info "Installing zsh-syntax-highlighting (OMZ plugin)..."
+  git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+else
+  success "zsh-syntax-highlighting already installed"
+fi
 
 if [[ ! -d "$ZSH_CUSTOM/themes/powerlevel10k" ]]; then
   info "Installing Powerlevel10k..."
@@ -172,6 +194,18 @@ git config --global core.pager delta
 git config --global interactive.diffFilter 'delta --color-only'
 git config --global delta.navigate true
 git config --global delta.side-by-side true
+
+# -----------------------------------------------------------------------------
+# Java (OpenJDK 21)
+# -----------------------------------------------------------------------------
+info "Configuring Java..."
+JAVA_HOME="$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home"
+if [[ -d "$JAVA_HOME" ]]; then
+  sudo ln -sfn "$(brew --prefix openjdk@21)/libexec/openjdk.jdk" /Library/Java/JavaVirtualMachines/openjdk-21.jdk
+  success "OpenJDK 21 linked"
+else
+  warn "OpenJDK 21 not found at expected path"
+fi
 
 # -----------------------------------------------------------------------------
 # Done
