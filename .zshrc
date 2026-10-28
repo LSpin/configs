@@ -39,6 +39,11 @@ export PATH=$PATH:/usr/local/bin
 # ENVIRONMENT
 # =============================================================================
 export EDITOR='nvim'
+export JAVA_HOME=$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home
+export PATH="$JAVA_HOME/bin:$PATH"
+
+# secrets / machine-specific exports live here (not tracked in git)
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # =============================================================================
 # HISTORY
@@ -87,6 +92,11 @@ mkcd() { mkdir -p "$1" && cd "$1"; }
 # =============================================================================
 eval "$(zoxide init zsh)"
 eval $(thefuck --alias)
+command -v mise &>/dev/null && eval "$(mise activate zsh)"
+source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$(brew --prefix)/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
 source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
 source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
 

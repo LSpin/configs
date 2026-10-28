@@ -1,10 +1,14 @@
 #!/bin/zsh
 # bootstrap.sh — fresh machine setup from github.com/LSpin/configs
+# Safe to re-run.
 
 set -e
 
 CONFIGS_REPO="https://github.com/LSpin/configs.git"
 CONFIGS_DIR="$HOME/configs"
+NVIM_REPO="LSpin/nvim-config"
+NVIM_DIR="$HOME/.config/nvim"
+NERD_FONT="CourierPrimeCodeNerdFont-Regular"
 
 # -----------------------------------------------------------------------------
 # Helpers
@@ -17,60 +21,29 @@ warn()    { print -P "%F{yellow}⚠ $1%f"; }
 # Homebrew
 # -----------------------------------------------------------------------------
 info "Checking Homebrew..."
-if ! command -v brew &>/dev/null; then
+if [[ ! -x /opt/homebrew/bin/brew ]]; then
   info "Installing Homebrew..."
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  eval "$(/opt/homebrew/bin/brew shellenv)"
 else
   success "Homebrew already installed"
 fi
+eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # -----------------------------------------------------------------------------
-# CLI tools
+# Configs repo
 # -----------------------------------------------------------------------------
-info "Installing CLI tools..."
-brew install \
-  git gh \
-  neovim neovim-remote \
-  fzf eza bat fd ripgrep \
-  zoxide git-delta lazygit \
-  btop cmatrix fastfetch \
-  thefuck tldr \
-  node python@3.13 \
-  asdf wget awscli docker \
-  lua-language-server stylua \
-  openjdk@21 postgresql@16
-
-$(brew --prefix)/opt/fzf/install --key-bindings --completion --no-update-rc --no-bash --no-fish
+info "Pulling configs from GitHub..."
+if [[ ! -d "$CONFIGS_DIR" ]]; then
+  git clone "$CONFIGS_REPO" "$CONFIGS_DIR"
+else
+  git -C "$CONFIGS_DIR" pull
+fi
 
 # -----------------------------------------------------------------------------
-# Apps
+# Packages, apps & fonts (Brewfile)
 # -----------------------------------------------------------------------------
-info "Installing apps..."
-brew install --cask \
-  iterm2 \
-  visual-studio-code \
-  intellij-idea \
-  raycast \
-  alt-tab \
-  aldente \
-  google-chrome \
-  google-drive \
-  discord \
-  spotify \
-  notion \
-  claude \
-  claude-code \
-  dbeaver-community \
-  adobe-acrobat-reader \
-  logi-options+ \
-  font-courier-prime-code \
-  font-cascadia-code \
-  font-cascadia-code-nf \
-  font-cousine-nerd-font \
-  font-im-writing-nerd-font \
-  font-atkinson-hyperlegible \
-  fontforge
+info "Installing Brewfile..."
+brew bundle --file="$CONFIGS_DIR/Brewfile" || warn "Some Brewfile entries failed — see output above"
 
 # -----------------------------------------------------------------------------
 # Oh My Zsh
@@ -78,16 +51,10 @@ brew install --cask \
 info "Checking Oh My Zsh..."
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
   info "Installing Oh My Zsh..."
-  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+  RUNZSH=no CHSH=no KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
 else
   success "Oh My Zsh already installed"
 fi
-
-# -----------------------------------------------------------------------------
-# Zsh plugins
-# -----------------------------------------------------------------------------
-info "Installing zsh plugins..."
-brew install zsh-autosuggestions zsh-history-substring-search
 
 ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
 
@@ -106,19 +73,22 @@ else
 fi
 
 # -----------------------------------------------------------------------------
-# Configs
+# Dotfiles (.zshrc, .zprofile, .p10k.zsh) — symlinked into the repo
 # -----------------------------------------------------------------------------
-info "Pulling configs from GitHub..."
-if [[ ! -d "$CONFIGS_DIR" ]]; then
-  git clone "$CONFIGS_REPO" "$CONFIGS_DIR"
-else
-  git -C "$CONFIGS_DIR" pull
-fi
-
 info "Linking configs..."
-cp "$CONFIGS_DIR/.zshrc" "$HOME/.zshrc"
-mkdir -p "$HOME/.config"
-cp -r "$CONFIGS_DIR/nvim" "$HOME/.config/nvim"
+"$CONFIGS_DIR/link.sh"
+
+# Neovim — separate private repo (github.com/LSpin/nvim-config)
+info "Setting up Neovim config..."
+if [[ -d "$NVIM_DIR/.git" ]]; then
+  git -C "$NVIM_DIR" pull
+elif [[ -e "$NVIM_DIR" ]]; then
+  warn "$NVIM_DIR exists but isn't a git repo — skipping (move it aside and re-run)"
+else
+  gh auth status &>/dev/null || gh auth login
+  gh auth setup-git
+  gh repo clone "$NVIM_REPO" "$NVIM_DIR"
+fi
 
 # IntelliJ — find whichever version dir exists (created on first launch)
 INTELLIJ_DIR=$(ls -d "$HOME/Library/Application Support/JetBrains/IntelliJIdea"* 2>/dev/null | sort -V | tail -1)
@@ -134,21 +104,24 @@ fi
 # -----------------------------------------------------------------------------
 # Font: Courier Prime Code (Nerd Font patched)
 # -----------------------------------------------------------------------------
-info "Patching and installing Courier Prime Code Nerd Font..."
-
-curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FontPatcher.zip -o /tmp/FontPatcher.zip
-unzip -o /tmp/FontPatcher.zip -d /tmp/FontPatcher
-
-mkdir -p /tmp/patched-fonts
-fontforge -script /tmp/FontPatcher/font-patcher \
-  "$HOME/Library/Fonts/Courier Prime Code.ttf" \
-  --complete \
-  --outputdir /tmp/patched-fonts/
-
-cp /tmp/patched-fonts/CourierPrimeCodeNerdFont-Regular.ttf "$HOME/Library/Fonts/"
+if [[ -f "$HOME/Library/Fonts/$NERD_FONT.ttf" ]]; then
+  success "Courier Prime Code Nerd Font already installed"
+else
+  info "Patching and installing Courier Prime Code Nerd Font..."
+  FONT_TMP=$(mktemp -d)
+  curl -fsSL https://github.com/ryanoasis/nerd-fonts/releases/latest/download/FontPatcher.zip -o "$FONT_TMP/FontPatcher.zip"
+  unzip -oq "$FONT_TMP/FontPatcher.zip" -d "$FONT_TMP/FontPatcher"
+  fontforge -script "$FONT_TMP/FontPatcher/font-patcher" \
+    "$HOME/Library/Fonts/Courier Prime Code.ttf" \
+    --complete \
+    --outputdir "$FONT_TMP/patched/"
+  cp "$FONT_TMP/patched/$NERD_FONT.ttf" "$HOME/Library/Fonts/"
+  rm -rf "$FONT_TMP"
+  success "Courier Prime Code Nerd Font installed"
+fi
 
 # VS Code — editor + integrated terminal
-python3 - <<'PYEOF'
+NERD_FONT="$NERD_FONT" python3 - <<'PYEOF'
 import json, os
 
 path = os.path.expanduser("~/Library/Application Support/Code/User/settings.json")
@@ -160,29 +133,17 @@ if os.path.exists(path):
             settings = json.load(f)
     except (json.JSONDecodeError, OSError):
         pass
-settings["editor.fontFamily"] = "CourierPrimeCodeNerdFont-Regular"
-settings["terminal.integrated.fontFamily"] = "CourierPrimeCodeNerdFont-Regular"
+settings["editor.fontFamily"] = os.environ["NERD_FONT"]
+settings["terminal.integrated.fontFamily"] = os.environ["NERD_FONT"]
 with open(path, "w") as f:
     json.dump(settings, f, indent=2)
 PYEOF
 
-# iTerm2 — set font on every profile in the plist
-python3 - <<'PYEOF'
-import plistlib, os, subprocess
-
-plist = os.path.expanduser("~/Library/Preferences/com.googlecode.iterm2.plist")
-font  = "CourierPrimeCodeNerdFont-Regular 18"
-
-if os.path.exists(plist):
-    subprocess.run(["plutil", "-convert", "xml1", plist], check=True)
-    with open(plist, "rb") as f:
-        prefs = plistlib.load(f)
-    for profile in prefs.get("New Bookmarks", []):
-        profile["Normal Font"]    = font
-        profile["Non Ascii Font"] = font
-    with open(plist, "wb") as f:
-        plistlib.dump(prefs, f, fmt=plistlib.FMT_XML)
-PYEOF
+# iTerm2 — dynamic profile (inherits from "Default", overrides the font) set as default
+ITERM_PROFILES="$HOME/Library/Application Support/iTerm2/DynamicProfiles"
+mkdir -p "$ITERM_PROFILES"
+cp "$CONFIGS_DIR/iterm2/configs.json" "$ITERM_PROFILES/configs.json"
+defaults write com.googlecode.iterm2 "Default Bookmark Guid" -string "lspin-configs-profile"
 
 success "Font configured (VS Code, iTerm2)"
 
@@ -211,4 +172,5 @@ fi
 # Done
 # -----------------------------------------------------------------------------
 success "Done! Open a new terminal or run: source ~/.zshrc"
-warn "Run 'p10k configure' to set up your prompt."
+warn "Put secrets / machine-specific exports in ~/.zshrc.local (not tracked)."
+warn "Docker: run 'colima start' to get a container engine."
