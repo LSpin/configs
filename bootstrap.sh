@@ -148,13 +148,14 @@ defaults write com.googlecode.iterm2 "Default Bookmark Guid" -string "lspin-conf
 success "Font configured (VS Code, iTerm2)"
 
 # -----------------------------------------------------------------------------
-# Git delta
+# Git — shared settings live in the repo; ~/.gitconfig just includes them
+# (not symlinked: `git config --global` would replace the symlink)
 # -----------------------------------------------------------------------------
-info "Configuring git delta..."
-git config --global core.pager delta
-git config --global interactive.diffFilter 'delta --color-only'
-git config --global delta.navigate true
-git config --global delta.side-by-side true
+info "Configuring git..."
+if ! git config --global --get-all include.path | grep -qx "~/configs/gitconfig"; then
+  git config --global --add include.path "~/configs/gitconfig"
+fi
+success "git config included from ~/configs/gitconfig"
 
 # -----------------------------------------------------------------------------
 # Java (OpenJDK 21)

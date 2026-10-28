@@ -33,13 +33,18 @@ source $ZSH/oh-my-zsh.sh
 # =============================================================================
 # PATH
 # =============================================================================
+: ${HOMEBREW_PREFIX:=/opt/homebrew}   # set by brew shellenv in .zprofile; fallback for non-login shells
 export PATH=$PATH:/usr/local/bin
+for dir in "$HOME/.local/bin" "$HOME/.local/opt/go/bin" "$HOME/go/bin"; do
+  [[ -d $dir ]] && path=("$dir" $path)
+done
+unset dir
 
 # =============================================================================
 # ENVIRONMENT
 # =============================================================================
 export EDITOR='nvim'
-export JAVA_HOME=$(brew --prefix openjdk@21)/libexec/openjdk.jdk/Contents/Home
+export JAVA_HOME="$HOMEBREW_PREFIX/opt/openjdk@21/libexec/openjdk.jdk/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 # secrets / machine-specific exports live here (not tracked in git)
@@ -75,10 +80,6 @@ alias ls='eza --icons'
 alias cat='bat'
 alias find='fd'
 
-# gh copilot
-alias ghcs='gh copilot suggest'
-alias ghce='gh copilot explain'
-
 # brew
 alias buu='brew update && brew upgrade'
 
@@ -93,15 +94,11 @@ mkcd() { mkdir -p "$1" && cd "$1"; }
 eval "$(zoxide init zsh)"
 eval $(thefuck --alias)
 command -v mise &>/dev/null && eval "$(mise activate zsh)"
-source "$(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
-source "$(brew --prefix)/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source "$HOMEBREW_PREFIX/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
-source "$(brew --prefix)/opt/fzf/shell/key-bindings.zsh"
-source "$(brew --prefix)/opt/fzf/shell/completion.zsh"
-
-# Generated for envman. Do not edit.
-[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
+# fzf key bindings + completion come from the OMZ fzf plugin
 
 # =============================================================================
 # SCREENSAVER

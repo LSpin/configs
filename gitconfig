@@ -1,0 +1,22 @@
+# Shared git config — included from ~/.gitconfig (see bootstrap.sh).
+# Machine-specific bits (credential helpers from `gh auth setup-git`) stay in ~/.gitconfig.
+[user]
+	name = LSpin
+	email = leonardospinola22@gmail.com
+[init]
+	defaultBranch = main
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+	side-by-side = true
+[push]
+	autoSetupRemote = true
+[fetch]
+	prune = true
+[merge]
+	conflictStyle = zdiff3
+[diff]
+	colorMoved = default
