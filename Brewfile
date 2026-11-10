@@ -59,7 +59,6 @@ cask "stremio"
 cask "claude"
 cask "claude-code"
 cask "dbeaver-community"
-cask "adobe-acrobat-reader"
 cask "logi-options+"
 
 # -----------------------------------------------------------------------------
